@@ -1,8 +1,10 @@
-open Saturn
-open Giraffe
+module Program
 
-let app = application {
-    use_router (text "Hello World!")
+let app = Saturn.Application.application {
+    use_router Router.router
 }
 
-run app
+[<EntryPoint>]
+let main _ =
+    Saturn.Application.run app
+    0
