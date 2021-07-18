@@ -6,11 +6,36 @@ open Giraffe
 open Microsoft.AspNetCore.Http
 open Saturn.ControllerHelpers
 open Score.Commands
+open Score.Domain
 open Score.Repository
 open System.Text.Json
 
-let getPersonalId ctx id =
-    Controller.text ctx (sprintf "%d" id)
+let handleGetError (ctx: HttpContext) =
+    ServerErrors.internalError (json {| error = "Internal server error" |}) earlyReturn ctx
+
+let handleScoreFound (ctx: HttpContext) (score: Score) =
+    Successful.ok (json score) earlyReturn ctx
+
+let handleScoreNotFound (ctx: HttpContext) =
+    RequestErrors.notFound
+        (json {| error = "There is no score for this CPF" |})
+        earlyReturn
+        ctx
+
+let getPersonalId ctx cpf =
+    task {
+        let config: Config = Controller.getConfig ctx
+        let connectionString = config.ConnectionString
+        let! result = getByCpf connectionString cpf
+        let response =
+            match result with
+                | Ok (Some s) -> handleScoreFound ctx s
+                | Ok None -> handleScoreNotFound ctx
+                | Error _ -> handleGetError ctx
+
+        return! response
+    }
+
 
 let handleCreateError (ctx: HttpContext) (error: RepositoryError) =
     match error with
