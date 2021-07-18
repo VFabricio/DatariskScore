@@ -11,6 +11,9 @@ open System.Text.Json
 let getPersonalId ctx id =
     Controller.text ctx (sprintf "%d" id)
 
+let handleCreateOk (ctx: HttpContext) =
+    Successful.created (text "") earlyReturn ctx
+
 let handleJsonException (ctx: HttpContext) =
     RequestErrors.badRequest (json {| error = "Bad Input!" |}) earlyReturn ctx
 
@@ -27,7 +30,7 @@ let submitPersonalId (ctx: HttpContext) =
 
             let! result = createScore connectionString scoreDto
             match result with
-            | Ok(_) -> return! Controller.text ctx "ok"
+            | Ok(_) -> return! handleCreateOk ctx
             | Error(_) -> return! Controller.text ctx "error"
 
         with
