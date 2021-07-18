@@ -16,7 +16,10 @@ let submitPersonalId (ctx: HttpContext) =
 
         let! scoreDto = Controller.getJson<CreateScoreDto> ctx
 
-        return! createScore connectionString scoreDto
+        let! result = createScore connectionString scoreDto
+        match result with
+        | Ok(_) -> return! Controller.text ctx "ok"
+        | Error(_) -> return! Controller.text ctx "error"
     }
 
 let controller = Saturn.Controller.controller {
