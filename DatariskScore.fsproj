@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Database.fs" />
+    <Compile Include="Config.fs" />
+    <Compile Include="Score/Domain.fs" />
+    <Compile Include="Score/Repository.fs" />
+    <Compile Include="Score/Commands.fs" />
     <Compile Include="Score/Controller.fs" />
     <Compile Include="Score/Router.fs" />
     <Compile Include="Router.fs" />
@@ -13,7 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.90" />
     <PackageReference Include="giraffe" Version="5.0.0" />
+    <PackageReference Include="Npgsql.FSharp" Version="4.0.0" />
     <PackageReference Include="saturn" Version="0.15.0" />
   </ItemGroup>
 
