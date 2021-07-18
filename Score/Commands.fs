@@ -1,6 +1,7 @@
 module Score.Commands
 
 open Score.Domain
+open Score.Repository
 open FSharp.Control.Tasks
 open System.Threading.Tasks
 
@@ -9,8 +10,7 @@ type CreateScoreDto = {
     cpf: string
 }
 
-
-let createScore (connectionString: string) (dto: CreateScoreDto): Task<Result<int, exn>> =
+let createScore (connectionString: string) (dto: CreateScoreDto): Task<Result<unit, RepositoryError>> =
     task {
         let guid = System.Guid.NewGuid()
         let now = System.DateTime.UtcNow
