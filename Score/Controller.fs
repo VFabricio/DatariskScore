@@ -10,11 +10,24 @@ open Score.Domain
 open Score.Repository
 open System.Text.Json
 
+type GetScoreDto = {
+    // fsharplint:disable-next-line RecordFieldNames
+    score: string
+    // fsharplint:disable-next-line RecordFieldNames
+    created_at: string
+}
+
+let domainToDto score = {
+    score = score.Cpf
+    created_at = score.CreatedAt.ToIsoString()
+}
+
 let handleGetError (ctx: HttpContext) =
     ServerErrors.internalError (json {| error = "Internal server error" |}) earlyReturn ctx
 
 let handleScoreFound (ctx: HttpContext) (score: Score) =
-    Successful.ok (json score) earlyReturn ctx
+    let dto = domainToDto score
+    Successful.ok (json dto) earlyReturn ctx
 
 let handleScoreNotFound (ctx: HttpContext) =
     RequestErrors.notFound
