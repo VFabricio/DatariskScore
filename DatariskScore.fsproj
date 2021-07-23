@@ -11,6 +11,7 @@
     <Compile Include="Score/Domain.fs" />
     <Compile Include="Score/Repository.fs" />
     <Compile Include="Score/Commands.fs" />
+    <Compile Include="Score/Queries.fs" />
     <Compile Include="Score/Controller.fs" />
     <Compile Include="Score/Router.fs" />
     <Compile Include="Router.fs" />
