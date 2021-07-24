@@ -7,6 +7,7 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.TestHost
 open System.Net
+open System.Net.Http
 
 let configureWebHostBuilder (builder: IWebHostBuilder) =
     builder.UseTestServer() |> ignore
@@ -14,18 +15,23 @@ let configureWebHostBuilder (builder: IWebHostBuilder) =
 let createHost () =
     Program.app.ConfigureWebHost(Action<IWebHostBuilder> configureWebHostBuilder)
 
-let getScore = task {
+let postCpfNotJson = task {
     use host = createHost().Start()
     let client = host.GetTestClient()
-    let! response = client.GetAsync("/score/12345678901")
-    let code = response.StatusCode
-    Expect.equal code HttpStatusCode.NotFound "the response must be a 404"
+
+    let body = new StringContent("")
+    let! response = client.PostAsync("/score", body)
+
+    Expect.equal
+        response.StatusCode
+        HttpStatusCode.BadRequest
+        "a POST with a non-JSON body should return 400"
 }
 
 [<Tests>]
 let tests =
     testList "HTTP integration tests" [
-        testCaseAsync "foo" (Async.AwaitTask getScore)
+        testCaseAsync "postCpfNotJson" (Async.AwaitTask postCpfNotJson)
     ]
 
 [<EntryPoint>]
