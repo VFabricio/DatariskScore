@@ -83,6 +83,18 @@ let postCpfTwice = task {
         "a POST with an existing, valid CPF should return 409"
 }
 
+let getNonExistingCpf = task {
+    use host = createHost().Start()
+    let client = host.GetTestClient()
+
+    let! response = client.GetAsync("/score/12345678910")
+
+    Expect.equal
+        response.StatusCode
+        HttpStatusCode.NotFound
+        "a GET with a non-existing CPF should return 404"
+}
+
 [<Tests>]
 let tests =
     testList "HTTP integration tests" [
@@ -91,6 +103,7 @@ let tests =
         testCaseAsync "postCpfNonStringCpf" (Async.AwaitTask postCpfNonStringCpf)
         testCaseAsync "postCpfSuccess" (Async.AwaitTask postCpfSuccess)
         testCaseAsync "postCpfTwice" (Async.AwaitTask postCpfTwice)
+        testCaseAsync "getNonExistingCpf" (Async.AwaitTask getNonExistingCpf)
     ]
 
 [<EntryPoint>]
