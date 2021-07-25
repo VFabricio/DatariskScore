@@ -15,7 +15,7 @@ let configureServices (services: IServiceCollection) =
     ) |> ignore
     services
 
-let app = Saturn.Application.application {
+let createApp () = Saturn.Application.application {
     use_router Router.router
     use_config (fun _ -> Config.initialize())
     service_config configureServices
@@ -23,5 +23,5 @@ let app = Saturn.Application.application {
 
 [<EntryPoint>]
 let main _ =
-    Saturn.Application.run app
+    createApp() |> Saturn.Application.run
     0
