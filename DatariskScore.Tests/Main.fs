@@ -56,12 +56,26 @@ let postCpfNonStringCpf = task {
         "a POST where the CPF is not a string should return 400"
 }
 
+let postCpfSuccess = task {
+    use host = createHost().Start()
+    let client = host.GetTestClient()
+
+    let body = JsonContent.Create({| cpf = "12345678910" |})
+    let! response = client.PostAsync("/score", body)
+
+    Expect.equal
+        response.StatusCode
+        HttpStatusCode.Created
+        "a POST with a new, valid CPF should return 201"
+}
+
 [<Tests>]
 let tests =
     testList "HTTP integration tests" [
         testCaseAsync "postCpfNotJson" (Async.AwaitTask postCpfNotJson)
         testCaseAsync "postCpfNoCpf" (Async.AwaitTask postCpfNoCpf)
         testCaseAsync "postCpfNonStringCpf" (Async.AwaitTask postCpfNonStringCpf)
+        testCaseAsync "postCpfSuccess" (Async.AwaitTask postCpfSuccess)
     ]
 
 [<EntryPoint>]
