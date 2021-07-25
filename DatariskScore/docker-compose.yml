@@ -9,6 +9,12 @@ services:
       - postgres-data:/var/lib/postgresql
     ports:
       - "5432:5432"
+  server:
+    build: .
+    ports:
+      - "5000:80"
+    depends_on:
+      - "postgres"
 
 volumes:
   postgres-data:

@@ -12,7 +12,7 @@ module Sql = Npgsql.FSharp.Sql
 let getConnectionString () =
     let username = "postgres"
     let password = "password"
-    let host = "localhost"
+    let host = "postgres"
     let port = 5432
     let database = "datarisk"
 
