@@ -8,6 +8,7 @@ open Saturn.ControllerHelpers
 open Score.Commands
 open Score.Domain
 open Score.Repository
+open Score.Queries
 open System.Text.Json
 
 type GetScoreDto = {
@@ -18,7 +19,7 @@ type GetScoreDto = {
 }
 
 let domainToDto score = {
-    score = score.Cpf
+    score = score.Cpf.ToString()
     created_at = score.CreatedAt.ToIsoString()
 }
 
@@ -39,7 +40,7 @@ let getPersonalId ctx cpf =
     task {
         let config: Config = Controller.getConfig ctx
         let connectionString = config.ConnectionString
-        let! result = getByCpf connectionString cpf
+        let! result = getScore connectionString cpf
         let response =
             match result with
                 | Ok (Some s) -> handleScoreFound ctx s

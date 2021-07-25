@@ -38,18 +38,26 @@ type ScoreDao = {
 let daoToDomain (dao: ScoreDao) = {
     Id = dao.id
     CreatedAt = dao.created_at
-    Cpf = dao.cpf
+    Cpf = Cpf.create dao.cpf
     Value = dao.score
 }
 
-let insert (connectionString: string) (record: Score): Task<Result<unit, RepositoryError>> =
+let domainToDao (score: Score) = {
+    id = score.Id
+    created_at = score.CreatedAt
+    cpf = score.Cpf.ToString()
+    score = score.Value
+}
+
+let insert (connectionString: string) (score: Score): Task<Result<unit, RepositoryError>> =
     task {
         use connection = new NpgsqlConnection(connectionString)
+        let dao = domainToDao score
         let! result =
             execute
                 connection
-                "INSERT INTO score(id, cpf, score, created_at) VALUES (@Id, @Cpf, @Value, @CreatedAt)"
-                record
+                "INSERT INTO score(id, cpf, score, created_at) VALUES (@id, @cpf, @score, @created_at)"
+                dao
 
         let response =
             match result with
@@ -59,14 +67,14 @@ let insert (connectionString: string) (record: Score): Task<Result<unit, Reposit
         return response
     }
 
-let getByCpf (connectionString: string) (cpf: string): Task<Result<Option<Score>, RepositoryError>> =
+let getByCpf (connectionString: string) (cpf: Cpf.T): Task<Result<Option<Score>, RepositoryError>> =
     task {
         use connection = new NpgsqlConnection(connectionString)
         let! (result: Result<Option<ScoreDao>, exn>) =
             querySingle
                 connection
                 "SELECT id, cpf, score, created_at FROM score WHERE cpf=@cpf"
-                (dict ["cpf" => cpf] |> Some)
+                (dict ["cpf" => cpf.ToString()] |> Some)
 
         let response =
             result

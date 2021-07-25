@@ -18,7 +18,7 @@ let createScore (connectionString: string) (dto: CreateScoreDto): Task<Result<un
 
         let score = {
             Id = guid
-            Cpf = dto.cpf
+            Cpf = Cpf.create dto.cpf
             CreatedAt = now
             Value = scoreValue
         }
