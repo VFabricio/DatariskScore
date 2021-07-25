@@ -69,6 +69,20 @@ let postCpfSuccess = task {
         "a POST with a new, valid CPF should return 201"
 }
 
+let postCpfTwice = task {
+    use host = createHost().Start()
+    let client = host.GetTestClient()
+
+    let body = JsonContent.Create({| cpf = "12345678910" |})
+    let! _firstResponse = client.PostAsync("/score", body)
+    let! secondResponse = client.PostAsync("/score", body)
+
+    Expect.equal
+        secondResponse.StatusCode
+        HttpStatusCode.Conflict
+        "a POST with an existing, valid CPF should return 409"
+}
+
 [<Tests>]
 let tests =
     testList "HTTP integration tests" [
@@ -76,6 +90,7 @@ let tests =
         testCaseAsync "postCpfNoCpf" (Async.AwaitTask postCpfNoCpf)
         testCaseAsync "postCpfNonStringCpf" (Async.AwaitTask postCpfNonStringCpf)
         testCaseAsync "postCpfSuccess" (Async.AwaitTask postCpfSuccess)
+        testCaseAsync "postCpfTwice" (Async.AwaitTask postCpfTwice)
     ]
 
 [<EntryPoint>]
