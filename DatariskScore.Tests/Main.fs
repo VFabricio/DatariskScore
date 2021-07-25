@@ -14,7 +14,7 @@ let configureWebHostBuilder (builder: IWebHostBuilder) =
     builder.UseTestServer() |> ignore
 
 let createHost () =
-    let app = Program.createApp()
+    let app = Config.initializeForTest() |> Program.createApp
     app.ConfigureWebHost(Action<IWebHostBuilder> configureWebHostBuilder)
 
 let postCpfNotJson = task {

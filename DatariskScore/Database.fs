@@ -2,8 +2,10 @@ module Database
 
 open Dapper
 open FSharp.Control.Tasks
+open Npgsql
 open System.Collections.Generic
 open System.Data.Common
+open System.IO
 
 module Sql = Npgsql.FSharp.Sql
 
@@ -20,6 +22,7 @@ let getConnectionString () =
     |> Sql.port port
     |> Sql.database database
     |> Sql.formatConnectionString
+
 
 let inline (=>) k v = k, box v
 
@@ -58,3 +61,38 @@ let querySingle (connection: #DbConnection) (sql: string) (parameters: Option<ID
         with
         | ex -> return Error ex
     }
+
+let getTestConnectionString () =
+    let id = System.Guid.NewGuid()
+
+    let username = "postgres"
+    let password = "password"
+    let host = "localhost"
+    let port = 5432
+    let database = $"datarisk-{id}"
+
+    let builderWithoutDb =
+        Sql.host host
+        |> Sql.username username
+        |> Sql.password password
+        |> Sql.port port
+
+    let currentDirectory = __SOURCE_DIRECTORY__
+    let sqlPath = Path.Combine [| currentDirectory; "Database"; "create-score-table.sql" |]
+    let createScoreSql = File.ReadAllText(sqlPath)
+
+    let connectionStringWithoutDb = Sql.formatConnectionString builderWithoutDb
+    use connectionWithoutDb = new NpgsqlConnection(connectionStringWithoutDb)
+
+    connectionWithoutDb.Execute($"CREATE DATABASE \"{database}\"") |> ignore
+
+    let connectionStringWithDb =
+        builderWithoutDb
+            |> Sql.database database
+            |> Sql.formatConnectionString
+
+    let connectionWithDb = new NpgsqlConnection(connectionStringWithDb)
+    connectionWithDb.Execute(createScoreSql) |> ignore
+
+    connectionStringWithDb
+

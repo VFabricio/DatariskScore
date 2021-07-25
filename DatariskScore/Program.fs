@@ -1,5 +1,6 @@
 module Program
 
+open Config
 open Giraffe
 open Microsoft.Extensions.DependencyInjection
 open System.Text.Json.Serialization
@@ -15,13 +16,15 @@ let configureServices (services: IServiceCollection) =
     ) |> ignore
     services
 
-let createApp () = Saturn.Application.application {
+let createApp (config: Config) = Saturn.Application.application {
     use_router Router.router
-    use_config (fun _ -> Config.initialize())
+    use_config (fun _ -> config)
     service_config configureServices
 }
 
 [<EntryPoint>]
 let main _ =
-    createApp() |> Saturn.Application.run
+    initialize()
+    |> createApp
+    |> Saturn.Application.run
     0

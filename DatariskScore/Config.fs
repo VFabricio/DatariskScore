@@ -7,3 +7,7 @@ type Config = {
 let initialize () = {
     ConnectionString = Database.getConnectionString()
 }
+
+let initializeForTest () = {
+    ConnectionString = Database.getTestConnectionString()
+}
