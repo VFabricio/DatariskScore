@@ -43,11 +43,25 @@ let postCpfNoCpf = task {
         "a POST without the CPF property should return 400"
 }
 
+let postCpfNonStringCpf = task {
+    use host = createHost().Start()
+    let client = host.GetTestClient()
+
+    let body = JsonContent.Create({| cpf = 42 |})
+    let! response = client.PostAsync("/score", body)
+
+    Expect.equal
+        response.StatusCode
+        HttpStatusCode.BadRequest
+        "a POST where the CPF is not a string should return 400"
+}
+
 [<Tests>]
 let tests =
     testList "HTTP integration tests" [
         testCaseAsync "postCpfNotJson" (Async.AwaitTask postCpfNotJson)
         testCaseAsync "postCpfNoCpf" (Async.AwaitTask postCpfNoCpf)
+        testCaseAsync "postCpfNonStringCpf" (Async.AwaitTask postCpfNonStringCpf)
     ]
 
 [<EntryPoint>]
