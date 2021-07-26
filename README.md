@@ -26,6 +26,18 @@ run
 DatariskScore/Scripts/initialize-database.sh
 ```
 
+# Testing
+
+There are integration tests on the `DatariskScore.Tests` project. They can be
+run with
+```
+dotnet run
+```
+IMPORTANT: the tests run against the real development database. If the database
+has not been started and the migrations have not been ran, there could be
+spurious test failures. Make sure to spin up the database (`docker-compose up postgres`
+suffices) and run the migrations before running the tests
+
 # ToDo
 
 There several improvements that I would've liked to implement but havent't had
