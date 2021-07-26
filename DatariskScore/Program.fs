@@ -11,20 +11,22 @@ let configureServices (services: IServiceCollection) =
     let serializationOptions = SystemTextJson.Serializer.DefaultOptions
     serializationOptions.Converters.Add(JsonFSharpConverter())
 
-    services.AddSingleton<Json.ISerializer>(
-        SystemTextJson.Serializer(serializationOptions)
-    ) |> ignore
+    services.AddSingleton<Json.ISerializer>(SystemTextJson.Serializer(serializationOptions))
+    |> ignore
+
     services
 
-let createApp (config: Config) = Saturn.Application.application {
-    use_router Router.router
-    use_config (fun _ -> config)
-    service_config configureServices
-}
+let createApp (config: Config) =
+    Saturn.Application.application {
+        use_router Router.router
+        use_config (fun _ -> config)
+        service_config configureServices
+    }
 
 [<EntryPoint>]
 let main _ =
-    initialize()
+    initialize ()
     |> createApp
     |> Saturn.Application.run
+
     0

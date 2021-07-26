@@ -42,6 +42,7 @@ let query (connection: #DbConnection) (sql: string) (parameters: Option<IDiction
                 match parameters with
                 | Some p -> connection.QueryAsync<'T>(sql, p)
                 | None -> connection.QueryAsync<'T>(sql)
+
             return Ok res
         with
         | ex -> return Error ex
@@ -54,9 +55,12 @@ let querySingle (connection: #DbConnection) (sql: string) (parameters: Option<ID
                 match parameters with
                 | Some p -> connection.QuerySingleOrDefaultAsync<'T>(sql, p)
                 | None -> connection.QuerySingleOrDefaultAsync<'T>(sql)
+
             return
-                if isNull (box res) then Ok None
-                else Ok (Some res)
+                if isNull (box res) then
+                    Ok None
+                else
+                    Ok(Some res)
 
         with
         | ex -> return Error ex
@@ -78,21 +82,31 @@ let getTestConnectionString () =
         |> Sql.port port
 
     let currentDirectory = __SOURCE_DIRECTORY__
-    let sqlPath = Path.Combine [| currentDirectory; "Database"; "create-score-table.sql" |]
+
+    let sqlPath =
+        Path.Combine [| currentDirectory
+                        "Database"
+                        "create-score-table.sql" |]
+
     let createScoreSql = File.ReadAllText(sqlPath)
 
-    let connectionStringWithoutDb = Sql.formatConnectionString builderWithoutDb
-    use connectionWithoutDb = new NpgsqlConnection(connectionStringWithoutDb)
+    let connectionStringWithoutDb =
+        Sql.formatConnectionString builderWithoutDb
 
-    connectionWithoutDb.Execute($"CREATE DATABASE \"{database}\"") |> ignore
+    use connectionWithoutDb =
+        new NpgsqlConnection(connectionStringWithoutDb)
+
+    connectionWithoutDb.Execute($"CREATE DATABASE \"{database}\"")
+    |> ignore
 
     let connectionStringWithDb =
         builderWithoutDb
-            |> Sql.database database
-            |> Sql.formatConnectionString
+        |> Sql.database database
+        |> Sql.formatConnectionString
 
-    let connectionWithDb = new NpgsqlConnection(connectionStringWithDb)
+    let connectionWithDb =
+        new NpgsqlConnection(connectionStringWithDb)
+
     connectionWithDb.Execute(createScoreSql) |> ignore
 
     connectionStringWithDb
-

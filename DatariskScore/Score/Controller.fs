@@ -11,17 +11,16 @@ open Score.Repository
 open Score.Queries
 open System.Text.Json
 
-type GetScoreDto = {
-    // fsharplint:disable-next-line RecordFieldNames
-    score: string
-    // fsharplint:disable-next-line RecordFieldNames
-    created_at: string
-}
+type GetScoreDto =
+    {
+      // fsharplint:disable-next-line RecordFieldNames
+      score: string
+      // fsharplint:disable-next-line RecordFieldNames
+      created_at: string }
 
-let domainToDto score = {
-    score = score.Cpf.ToString()
-    created_at = score.CreatedAt.ToIsoString()
-}
+let domainToDto score =
+    { score = score.Cpf.ToString()
+      created_at = score.CreatedAt.ToIsoString() }
 
 let handleGetError (ctx: HttpContext) =
     ServerErrors.internalError (json {| error = "Internal server error" |}) earlyReturn ctx
@@ -31,21 +30,19 @@ let handleScoreFound (ctx: HttpContext) (score: Score) =
     Successful.ok (json dto) earlyReturn ctx
 
 let handleScoreNotFound (ctx: HttpContext) =
-    RequestErrors.notFound
-        (json {| error = "There is no score for this CPF" |})
-        earlyReturn
-        ctx
+    RequestErrors.notFound (json {| error = "There is no score for this CPF" |}) earlyReturn ctx
 
 let getPersonalId ctx cpf =
     task {
         let config: Config = Controller.getConfig ctx
         let connectionString = config.ConnectionString
         let! result = getScore connectionString cpf
+
         let response =
             match result with
-                | Ok (Some s) -> handleScoreFound ctx s
-                | Ok None -> handleScoreNotFound ctx
-                | Error _ -> handleGetError ctx
+            | Ok (Some s) -> handleScoreFound ctx s
+            | Ok None -> handleScoreNotFound ctx
+            | Error _ -> handleGetError ctx
 
         return! response
     }
@@ -54,15 +51,8 @@ let getPersonalId ctx cpf =
 let handleCreateError (ctx: HttpContext) (error: RepositoryError) =
     match error with
     | RecordAlreadyExists ->
-        RequestErrors.conflict
-            (json {| error = "There is already a score for this CPF" |})
-            earlyReturn
-            ctx
-    | UnknownError ->
-        ServerErrors.internalError
-            (json {| error = "Internal server error" |})
-            earlyReturn
-            ctx
+        RequestErrors.conflict (json {| error = "There is already a score for this CPF" |}) earlyReturn ctx
+    | UnknownError -> ServerErrors.internalError (json {| error = "Internal server error" |}) earlyReturn ctx
 
 let handleCreateOk (ctx: HttpContext) =
     Successful.created (text "") earlyReturn ctx
@@ -82,6 +72,7 @@ let submitPersonalId (ctx: HttpContext) =
             let! scoreDto = Controller.getJson<CreateScoreDto> ctx
 
             let! result = createScore connectionString scoreDto
+
             match result with
             | Ok _ -> return! handleCreateOk ctx
             | Error e -> return! handleCreateError ctx e
@@ -91,7 +82,8 @@ let submitPersonalId (ctx: HttpContext) =
         | _ -> return! handleOtherExceptions ctx
     }
 
-let controller = Saturn.Controller.controller {
-    create submitPersonalId
-    show getPersonalId
-}
+let controller =
+    Saturn.Controller.controller {
+        create submitPersonalId
+        show getPersonalId
+    }
